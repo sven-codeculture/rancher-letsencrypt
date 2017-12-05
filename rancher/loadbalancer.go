@@ -6,30 +6,40 @@ import (
 )
 
 // UpdateLoadBalancers updates all load balancers with the renewed certificate
-func (r *Client) UpdateLoadBalancers(certId string) error {
-	balancers, err := r.findLoadBalancerServicesByCert(certId)
+func (r *Client) UpdateLoadBalancer(lbId string, certId string) error {
+	lb, err := r.client.LoadBalancerService.ById(lbId)
 	if err != nil {
+		logrus.Errorf("Failed to get load balancer by ID %s: %v", id, err)
 		return err
 	}
 
-	if len(balancers) == 0 {
-		logrus.Info("Certificate not used by any load balancer")
-		return nil
+	var found bool = false
+	if lb.LbConfig.DefaultCertificateId {
+		if lb.LbConfig.DefaultCertificateId == certId {
+			found = true
+		} else {
+			for _, id := range lb.LbConfig.CertificateIds {
+				if id == certId {
+					found = true
+					break
+				}
+			}
+		}
+	} else {
+		lb.LbConfig.DefaultCertificateId = certId
+		found = true
 	}
 
-	for _, id := range balancers {
-		lb, err := r.client.LoadBalancerService.ById(id)
-		if err != nil {
-			logrus.Errorf("Failed to get load balancer by ID %s: %v", id, err)
-			continue
-		}
+	if ! found {
+		lb.LbConfig.CertificateIds = append(lb.LbConfig.CertificateIds, certId)
+	}
 
-		err = r.update(lb)
-		if err != nil {
-			logrus.Errorf("Failed to update load balancer '%s': %v", lb.Name, err)
-		} else {
-			logrus.Infof("Updated load balancer '%s' with changed certificate", lb.Name)
-		}
+	err = r.update(lb)
+	if err != nil {
+		logrus.Errorf("Failed to update load balancer '%s': %v", lb.Name, err)
+		return err
+	} else {
+		logrus.Infof("Updated load balancer '%s' with changed certificate", lb.Name)
 	}
 
 	return nil

@@ -55,6 +55,7 @@ func (c *Context) InitContext() {
 	cattleUrl := getEnvOption("CATTLE_URL", true)
 	cattleApiKey := getEnvOption("CATTLE_ACCESS_KEY", true)
 	cattleSecretKey := getEnvOption("CATTLE_SECRET_KEY", true)
+	loadBalancerId := getEnvOption("LOADBALANCER_ID", true)
 	eulaParam := getEnvOption("EULA", false)
 	apiVerParam := getEnvOption("API_VERSION", true)
 	c.LeApiVersion = letsencrypt.ApiVersion(apiVerParam)

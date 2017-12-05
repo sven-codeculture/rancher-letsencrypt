@@ -123,12 +123,13 @@ func (c *Context) updateRancherCert(commonName string, rancherCertId string, pri
 		return false
 	}
 	logrus.Infof("Updated Rancher certificate '%s'", commonName)
-	return true
 
-	// err = c.Rancher.UpdateLoadBalancers(rancherCertId)
-	// if err != nil {
-	// 	logrus.Fatalf("Failed to upgrade load balancers: %v", err)
-	// }
+	err = c.Rancher.UpdateLoadBalancers(c.loadBalancerId, rancherCertId)
+	if err != nil {
+		logrus.Fatalf("Failed to upgrade load balancers: %v", err)
+		return false
+	}
+	return true
 }
 //
 func (c *Context) timer() <-chan time.Time {
