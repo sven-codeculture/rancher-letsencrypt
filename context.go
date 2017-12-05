@@ -18,21 +18,31 @@ const (
 	RENEWAL_PERIOD_DAYS = 20
 )
 
-type Context struct {
+type Certificate struct {
+	TLD               string
+	CommonName        string
+	AltNames          []string
+	KeyType           string
+
+	ExpiryDate        time.Time
+
+	RancherCertId string
 	Acme    *letsencrypt.Client
+}
+
+type Context struct {
 	Rancher *rancher.Client
 
-	CertificateName   string
-	Domains           []string
+	AdminEmail   string
+	ServiceLabel string
+	Certificates []Certificate
+	LeApiVersion letsencrypt.ApiVersion
 	RenewalDayTime    int
 	RenewalPeriodDays int
-	RunOnce           bool
-
-	ExpiryDate    time.Time
-	RancherCertId string
 
 	Debug    bool
 	TestMode bool
+	RunOnce  bool
 }
 
 // InitContext initializes the application context from environmental variables
@@ -40,17 +50,17 @@ func (c *Context) InitContext() {
 	var err error
 	c.Debug = debug
 	c.TestMode = testMode
+	c.ServiceLabel = getEnvOption("SERVICE_LABEL", true)
+	c.AdminEmail = getEnvOption("EMAIL", true)
 	cattleUrl := getEnvOption("CATTLE_URL", true)
 	cattleApiKey := getEnvOption("CATTLE_ACCESS_KEY", true)
 	cattleSecretKey := getEnvOption("CATTLE_SECRET_KEY", true)
 	eulaParam := getEnvOption("EULA", false)
 	apiVerParam := getEnvOption("API_VERSION", true)
-	emailParam := getEnvOption("EMAIL", true)
-	domainParam := getEnvOption("DOMAINS", true)
-	keyTypeParam := getEnvOption("PUBLIC_KEY_TYPE", true)
-	certNameParam := getEnvOption("CERT_NAME", true)
+	c.LeApiVersion = letsencrypt.ApiVersion(apiVerParam)
+
 	dayTimeParam := getEnvOption("RENEWAL_TIME", true)
-	providerParam := getEnvOption("PROVIDER", true)
+	// providerParam := getEnvOption("PROVIDER", false) //true
 	resolversParam := getEnvOption("DNS_RESOLVERS", false)
 	renewalDays := getEnvOption("RENEWAL_PERIOD_DAYS", false)
 	runOnce := getEnvOption("RUN_ONCE", false)
@@ -71,11 +81,6 @@ func (c *Context) InitContext() {
 		logrus.Fatalf("Terms of service were not accepted")
 	}
 
-	c.Domains = listToSlice(domainParam)
-	if len(c.Domains) == 0 {
-		logrus.Fatalf("Invalid value for DOMAINS: %s", domainParam)
-	}
-
 	dnsResolvers := []string{}
 	if len(resolversParam) > 0 {
 		for _, resolver := range listToSlice(resolversParam) {
@@ -86,20 +91,26 @@ func (c *Context) InitContext() {
 		}
 	}
 
-	c.CertificateName = certNameParam
 	c.RenewalDayTime, err = strconv.Atoi(dayTimeParam)
 	if err != nil || c.RenewalDayTime < 0 || c.RenewalDayTime > 23 {
 		logrus.Fatalf("Invalid value for RENEWAL_TIME: %s", dayTimeParam)
 	}
 
-	apiVersion := letsencrypt.ApiVersion(apiVerParam)
-	keyType := letsencrypt.KeyType(keyTypeParam)
 
 	c.Rancher, err = rancher.NewClient(cattleUrl, cattleApiKey, cattleSecretKey)
 	if err != nil {
+		logrus.Info("FATAL")
 		logrus.Fatalf("Could not connect to Rancher API: %v", err)
 	}
 
+	// Enable debug mode
+	if c.Debug {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+}
+
+func (c *Context) GetLetsEncryptClient(emailParam string, keyType string, apiVersion letsencrypt.ApiVersion, providerParam string) *letsencrypt.Client {
+	var err error
 	providerOpts := letsencrypt.ProviderOpts{
 		Provider:             letsencrypt.Provider(providerParam),
 		AzureClientId:        getEnvOption("AZURE_CLIENT_ID", false),
@@ -128,18 +139,53 @@ func (c *Context) InitContext() {
 		NS1ApiKey:            getEnvOption("NS1_API_KEY", false),
 	}
 
-	c.Acme, err = letsencrypt.NewClient(emailParam, keyType, apiVersion, dnsResolvers, providerOpts)
+	acme, err := letsencrypt.NewClient(emailParam, letsencrypt.KeyType(keyType), apiVersion, []string{}, providerOpts)
 	if err != nil {
 		logrus.Fatalf("LetsEncrypt client: %v", err)
 	}
 
 	logrus.Infof("Using Let's Encrypt %s API", apiVersion)
-	c.Acme.EnableLogs()
+	acme.EnableLogs()
+	return acme
+}
 
-	// Enable debug mode
-	if c.Debug {
-		logrus.SetLevel(logrus.DebugLevel)
+func (c *Context) BuildCertificatesFromServiceLabel(service string) []Certificate {
+	var storedLocally, storedInRancher bool
+	certsFound := c.parseServiceLabel(service)
+	for i, baseCert := range certsFound {
+		logrus.Infof("%v", baseCert)
+		acmeClient := c.GetLetsEncryptClient(c.AdminEmail, baseCert.KeyType, c.LeApiVersion, "HTTP")
+		ok, acmeCert := acmeClient.GetStoredCertificate(baseCert.CommonName, baseCert.AltNames)
+		if ok {
+			storedLocally = true
+			certsFound[i].ExpiryDate = acmeCert.ExpiryDate
+			logrus.Infof("Found locally stored certificate '%s'", baseCert.CommonName)
+		}
+
+		rancherCert, err := c.Rancher.FindCertByName(baseCert.CommonName)
+		if err != nil {
+			logrus.Fatalf("Could not lookup certificate in Rancher API: %v", err)
+		}
+
+		if rancherCert != nil {
+			storedInRancher = true
+			certsFound[i].RancherCertId = rancherCert.Id
+			logrus.Infof("Found existing certificate '%s' in Rancher", baseCert.CommonName)
+		}
+
+		if storedLocally && storedInRancher {
+			if rancherCert.SerialNumber != acmeCert.SerialNumber {
+				logrus.Infof("Serial number mismatch between Rancher and local certificate '%s'", baseCert.CommonName)
+				c.updateRancherCert(baseCert.CommonName, rancherCert.Id, acmeCert.PrivateKey, acmeCert.Certificate)
+			}
+		} else if storedLocally && !storedInRancher {
+			logrus.Debugf("Adding certificate '%s' to Rancher", baseCert.CommonName)
+			certsFound[i].RancherCertId = c.addRancherCert(baseCert.CommonName, acmeCert.PrivateKey, acmeCert.Certificate)
+		}
+
+		certsFound[i].Acme = acmeClient
 	}
+	return certsFound
 }
 
 func getEnvOption(name string, required bool) string {
