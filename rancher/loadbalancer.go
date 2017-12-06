@@ -6,15 +6,20 @@ import (
 )
 
 // UpdateLoadBalancers updates all load balancers with the renewed certificate
-func (r *Client) UpdateLoadBalancer(lbId string, certId string) error {
+func (r *Client) UpdateLoadBalancer(lbName string, certId string) error {
+	lbId, err := r.findLoadBalancerServiceByName(lbName)
+	if err != nil {
+		logrus.Errorf("Failed to get load balancer by Name %s: %v", lbName, err)
+		return err
+	}
 	lb, err := r.client.LoadBalancerService.ById(lbId)
 	if err != nil {
-		logrus.Errorf("Failed to get load balancer by ID %s: %v", id, err)
+		logrus.Errorf("Failed to get load balancer by ID %s: %v", lbId, err)
 		return err
 	}
 
 	var found bool = false
-	if lb.LbConfig.DefaultCertificateId {
+	if lb.LbConfig.DefaultCertificateId != "" {
 		if lb.LbConfig.DefaultCertificateId == certId {
 			found = true
 		} else {
@@ -60,6 +65,30 @@ func (r *Client) update(lb *rancherClient.LoadBalancerService) error {
 	}
 
 	return nil
+}
+
+func (r *Client) findLoadBalancerServiceByName(name string) (string, error) {
+	var result string
+
+	logrus.Debugf("Looking up load balancer named %s", name)
+
+	balancer, err := r.client.LoadBalancerService.List(&rancherClient.ListOpts{
+		Filters: map[string]interface{}{
+			"removed_null": nil,
+			"state":        "active",
+			"name":         name,
+		},
+	})
+	if err != nil {
+		return result, err
+	}
+	if len(balancer.Data) > 0 {
+		result = balancer.Data[0].Id
+	} else {
+		logrus.Debug("Did not find any active load balancers")
+	}
+
+	return result, nil
 }
 
 func (r *Client) findLoadBalancerServicesByCert(certId string) ([]string, error) {

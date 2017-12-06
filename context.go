@@ -19,24 +19,25 @@ const (
 )
 
 type Certificate struct {
-	TLD               string
-	CommonName        string
-	AltNames          []string
-	KeyType           string
+	TLD           string
+	CommonName    string
+	AltNames      []string
+	KeyType       string
 
-	ExpiryDate        time.Time
+	ExpiryDate    time.Time
 
 	RancherCertId string
-	Acme    *letsencrypt.Client
+	Acme          *letsencrypt.Client
 }
 
 type Context struct {
 	Rancher *rancher.Client
 
-	AdminEmail   string
-	ServiceLabel string
-	Certificates []Certificate
-	LeApiVersion letsencrypt.ApiVersion
+	AdminEmail        string
+	ServiceLabel      string
+	LoadBalancerName  string
+	Certificates      []Certificate
+	LeApiVersion      letsencrypt.ApiVersion
 	RenewalDayTime    int
 	RenewalPeriodDays int
 
@@ -52,11 +53,12 @@ func (c *Context) InitContext() {
 	c.TestMode = testMode
 	c.ServiceLabel = getEnvOption("SERVICE_LABEL", true)
 	c.AdminEmail = getEnvOption("EMAIL", true)
+	c.LoadBalancerName = getEnvOption("LOADBALANCER_NAME", true)
 	cattleUrl := getEnvOption("CATTLE_URL", true)
 	cattleApiKey := getEnvOption("CATTLE_ACCESS_KEY", true)
 	cattleSecretKey := getEnvOption("CATTLE_SECRET_KEY", true)
-	loadBalancerId := getEnvOption("LOADBALANCER_ID", true)
 	eulaParam := getEnvOption("EULA", false)
+	
 	apiVerParam := getEnvOption("API_VERSION", true)
 	c.LeApiVersion = letsencrypt.ApiVersion(apiVerParam)
 

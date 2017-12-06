@@ -68,7 +68,13 @@ func (c *Context) renew() {
 
 		if success {
 			logrus.Infof("Certificate obtained successfully")
-			c.Certificates[index] = newCert
+			err := c.Rancher.UpdateLoadBalancer(c.LoadBalancerName, newCert.RancherCertId)
+			if err == nil {
+				c.Certificates[index] = newCert
+			} else {
+				logrus.Fatalf("Failed to upgrade load balancers: %v", err)
+			}
+
 		}
 	}
 }
@@ -123,12 +129,6 @@ func (c *Context) updateRancherCert(commonName string, rancherCertId string, pri
 		return false
 	}
 	logrus.Infof("Updated Rancher certificate '%s'", commonName)
-
-	err = c.Rancher.UpdateLoadBalancers(c.loadBalancerId, rancherCertId)
-	if err != nil {
-		logrus.Fatalf("Failed to upgrade load balancers: %v", err)
-		return false
-	}
 	return true
 }
 //
