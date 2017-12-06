@@ -39,6 +39,8 @@ func (r *Client) UpdateLoadBalancer(lbName string, certId string) error {
 		lb.LbConfig.CertificateIds = append(lb.LbConfig.CertificateIds, certId)
 	}
 
+	logrus.Infof("%v, %v", lb.LbConfig.DefaultCertificateId, lb.LbConfig.CertificateIds)
+
 	err = r.update(lb)
 	if err != nil {
 		logrus.Errorf("Failed to update load balancer '%s': %v", lb.Name, err)
