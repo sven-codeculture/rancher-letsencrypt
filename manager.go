@@ -86,11 +86,18 @@ func (c *Context) GetCertNew(cert Certificate) (bool, Certificate) {
 			logrus.Errorf("[%s] Error obtaining certificate: %s", k, v.Error())
 		}
 	} else {
-		newId := c.addRancherCert(cert.CommonName, acmeCert.PrivateKey, acmeCert.Certificate)
-		if newId != "" {
-			cert.RancherCertId = newId
-			cert.ExpiryDate = acmeCert.ExpiryDate
-			return true, cert
+		if cert.RancherCertId != "" {
+			if c.updateRancherCert(cert.CommonName, cert.RancherCertId, acmeCert.PrivateKey, acmeCert.Certificate) {
+				cert.ExpiryDate = acmeCert.ExpiryDate
+				return true, cert
+			}
+		} else {
+			newId := c.addRancherCert(cert.CommonName, acmeCert.PrivateKey, acmeCert.Certificate)
+			if newId != "" {
+				cert.RancherCertId = newId
+				cert.ExpiryDate = acmeCert.ExpiryDate
+				return true, cert
+			}
 		}
 	}
 	return false, cert
