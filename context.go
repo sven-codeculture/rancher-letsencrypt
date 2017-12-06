@@ -49,7 +49,7 @@ type Context struct {
 // InitContext initializes the application context from environmental variables
 func (c *Context) InitContext() {
 	var err error
-	c.Debug = debug
+	c.Debug = true //debug
 	c.TestMode = testMode
 	c.ServiceLabel = getEnvOption("SERVICE_LABEL", true)
 	c.AdminEmail = getEnvOption("EMAIL", true)
@@ -58,7 +58,7 @@ func (c *Context) InitContext() {
 	cattleApiKey := getEnvOption("CATTLE_ACCESS_KEY", true)
 	cattleSecretKey := getEnvOption("CATTLE_SECRET_KEY", true)
 	eulaParam := getEnvOption("EULA", false)
-	
+
 	apiVerParam := getEnvOption("API_VERSION", true)
 	c.LeApiVersion = letsencrypt.ApiVersion(apiVerParam)
 

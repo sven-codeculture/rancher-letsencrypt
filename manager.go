@@ -52,12 +52,6 @@ func (c *Context) renew() {
 		logrus.Infof("Trying to obtain SSL certificate (%s: %s) from Let's Encrypt %s CA",
 			cert.CommonName, strings.Join(cert.AltNames, ","), cert.Acme.ApiVersion())
 
-		if cert.Acme.ProviderName() == "HTTP" {
-			logrus.Info("Using HTTP Challenge: " +
-				"Make sure that HTTP requests for '/.well-known/acme-challenge' for all certificate " +
-				"domains are forwarded to port 80 of the container running this application")
-		}
-
 		var success bool
 		var newCert Certificate
 		if cert.ExpiryDate.IsZero() {
@@ -80,6 +74,12 @@ func (c *Context) renew() {
 }
 
 func (c *Context) GetCertNew(cert Certificate) (bool, Certificate) {
+	if cert.Acme.ProviderName() == "HTTP" {
+		logrus.Info("Using HTTP Challenge: " +
+			"Make sure that HTTP requests for '/.well-known/acme-challenge' for all certificate " +
+			"domains are forwarded to port 80 of the container running this application")
+	}
+
 	acmeCert, failures := cert.Acme.Issue(cert.CommonName, cert.AltNames)
 	if len(failures) > 0 {
 		for k, v := range failures {
@@ -104,6 +104,12 @@ func (c *Context) GetCertNew(cert Certificate) (bool, Certificate) {
 }
 
 func (c *Context) GetCertRenewal(cert Certificate) (bool, Certificate) {
+	if cert.Acme.ProviderName() == "HTTP" {
+		logrus.Info("Using HTTP Challenge: " +
+			"Make sure that HTTP requests for '/.well-known/acme-challenge' for all certificate " +
+			"domains are forwarded to port 80 of the container running this application")
+	}
+	
 	if time.Now().UTC().After(c.getRenewalDate(cert)) {
 		acmeCert, err := cert.Acme.Renew(cert.CommonName)
 		if err != nil {

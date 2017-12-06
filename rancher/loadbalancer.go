@@ -64,6 +64,7 @@ func (r *Client) update(lb *rancherClient.LoadBalancerService) error {
 	err = r.WaitService(service)
 	if err != nil {
 		logrus.Warnf(err.Error())
+		return err
 	}
 
 	return nil
