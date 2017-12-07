@@ -18,6 +18,25 @@ func (r *Client) UpdateLoadBalancer(lbName string, certId string) error {
 		return err
 	}
 
+
+	logrus.Infof("%v, %v", lb.LbConfig.DefaultCertificateId, lb.LbConfig.CertificateIds)
+
+	err = r.update(lb, certId)
+	if err != nil {
+		logrus.Errorf("Failed to update load balancer '%s': %v", lb.Name, err)
+		return err
+	} else {
+		logrus.Infof("Updated load balancer '%s' with changed certificate", lb.Name)
+	}
+
+	return nil
+}
+
+func (r *Client) update(lb *rancherClient.LoadBalancerService, certId string) error {
+	var updatedlb rancherClient.LoadBalancerService = *lb
+
+	logrus.Debugf("Updating load balancer %s", lb.Name)
+
 	var found bool = false
 	if lb.LbConfig.DefaultCertificateId != "" {
 		if lb.LbConfig.DefaultCertificateId == certId {
@@ -31,41 +50,38 @@ func (r *Client) UpdateLoadBalancer(lbName string, certId string) error {
 			}
 		}
 	} else {
-		lb.LbConfig.DefaultCertificateId = certId
+		updatedlb.LbConfig.DefaultCertificateId = certId
 		found = true
 	}
 
-	if ! found {
-		lb.LbConfig.CertificateIds = append(lb.LbConfig.CertificateIds, certId)
-	}
+	if found {
+		newlb, err := r.client.LoadBalancerService.ActionUpdate(lb)
 
-	logrus.Infof("%v, %v", lb.LbConfig.DefaultCertificateId, lb.LbConfig.CertificateIds)
+		if err != nil {
+			return err
+		}
 
-	err = r.update(lb)
-	if err != nil {
-		logrus.Errorf("Failed to update load balancer '%s': %v", lb.Name, err)
-		return err
+		err = r.WaitService(newlb)
+		if err != nil {
+			logrus.Warnf(err.Error())
+			return err
+		}
 	} else {
-		logrus.Infof("Updated load balancer '%s' with changed certificate", lb.Name)
+		updatedlb.LbConfig.CertificateIds = append(lb.LbConfig.CertificateIds, certId)
+		newlb, err := r.client.LoadBalancerService.Update(lb, updatedlb)
+
+		if err != nil {
+			return err
+		}
+
+		err = r.WaitLoadBalancerService(newlb)
+		if err != nil {
+			logrus.Warnf(err.Error())
+			return err
+		}
 	}
 
-	return nil
-}
-
-func (r *Client) update(lb *rancherClient.LoadBalancerService) error {
-
-	logrus.Debugf("Updating load balancer %s", lb.Name)
-
-	service, err := r.client.LoadBalancerService.ActionUpdate(lb)
-	if err != nil {
-		return err
-	}
-
-	err = r.WaitService(service)
-	if err != nil {
-		logrus.Warnf(err.Error())
-		return err
-	}
+	// logrus.Infof("%v", newlb.LbConfig.Resource)
 
 	return nil
 }
