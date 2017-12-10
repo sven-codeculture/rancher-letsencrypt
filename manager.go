@@ -80,7 +80,7 @@ func (c *Context) GetCertNew(cert Certificate) (bool, Certificate) {
 			"domains are forwarded to port 80 of the container running this application")
 	}
 
-	acmeCert, failures := cert.Acme.Issue(cert.CommonName, cert.AltNames)
+	acmeCert, failures := cert.Acme.Issue(cert.CommonName, append([]string{cert.CommonName}, cert.AltNames))
 	if len(failures) > 0 {
 		for k, v := range failures {
 			logrus.Errorf("[%s] Error obtaining certificate: %s", k, v.Error())
@@ -109,7 +109,7 @@ func (c *Context) GetCertRenewal(cert Certificate) (bool, Certificate) {
 			"Make sure that HTTP requests for '/.well-known/acme-challenge' for all certificate " +
 			"domains are forwarded to port 80 of the container running this application")
 	}
-	
+
 	if time.Now().UTC().After(c.getRenewalDate(cert)) {
 		acmeCert, err := cert.Acme.Renew(cert.CommonName)
 		if err != nil {
