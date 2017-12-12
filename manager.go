@@ -114,12 +114,13 @@ func (c *Context) GetCertRenewal(cert Certificate) (bool, Certificate) {
 		acmeCert, err := cert.Acme.Renew(cert.CommonName)
 		if err != nil {
 			logrus.Errorf("Failed to renew certificate: %v", err)
-		}
-		cert.ExpiryDate = acmeCert.ExpiryDate
-		logrus.Debugf("Overwriting Rancher certificate '%s'", cert.CommonName)
+		} else {
+			cert.ExpiryDate = acmeCert.ExpiryDate
+			logrus.Debugf("Overwriting Rancher certificate '%s'", cert.CommonName)
 
-		if c.updateRancherCert(cert.CommonName, cert.RancherCertId, acmeCert.PrivateKey, acmeCert.Certificate) {
-			return true, cert
+			if c.updateRancherCert(cert.CommonName, cert.RancherCertId, acmeCert.PrivateKey, acmeCert.Certificate) {
+				return true, cert
+			}
 		}
 	}
 	return false, cert
