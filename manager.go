@@ -145,12 +145,34 @@ func (c *Context) updateRancherCert(commonName string, rancherCertId string, pri
 	return true
 }
 //
-func (c *Context) timer() <-chan time.Time {
-	left := 120 * time.Second
 
+func (c *Context) timer() <-chan time.Time {
+	var left time.Duration
+	now := time.Now().UTC()
+	lowest := now.AddDate(0, 0, 60) // 60 days in the future is the default renewal date
+
+	// test mode forces renewal
+	if c.TestMode {
+		logrus.Debug("Test mode: Forced certificate renewal in 120 seconds")
+		left = 120 * time.Second
+	} else {
+		c.GatherCertificates()
+		for _, cert := range c.Certificates {
+			next := c.getRenewalDate(cert)
+			if next.Before(lowest) {
+				lowest = next
+			}
+		}
+		left = lowest.Sub(now)
+		if left <= 0 {
+			left = 10 * time.Second
+		}
+	}
+
+	logrus.Infof("Certificate renewal scheduled for %s", lowest.Format("2006/01/02 15:04 MST"))
 	return time.After(left)
 }
-//
+
 func (c *Context) getRenewalDate(cert Certificate) time.Time {
 	if cert.ExpiryDate.IsZero() {
 		logrus.Fatalf("Could not determine expiry date for certificate: %s", cert.CommonName)
