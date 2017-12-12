@@ -174,10 +174,12 @@ func (c *Context) timer() <-chan time.Time {
 }
 
 func (c *Context) getRenewalDate(cert Certificate) time.Time {
+	var date time.Time
 	if cert.ExpiryDate.IsZero() {
-		logrus.Fatalf("Could not determine expiry date for certificate: %s", cert.CommonName)
+		logrus.Infof("Could not determine expiry date for certificate: %s", cert.CommonName)
+		date = time.Now().UTC()
 	}
-	date := cert.ExpiryDate.AddDate(0, 0, -c.RenewalPeriodDays)
+	date = cert.ExpiryDate.AddDate(0, 0, -c.RenewalPeriodDays)
 	dYear, dMonth, dDay := date.Date()
 	return time.Date(dYear, dMonth, dDay, c.RenewalDayTime, 0, 0, 0, time.UTC)
 }
