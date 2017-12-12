@@ -171,9 +171,10 @@ func (c *Context) BuildCertificatesFromServiceLabel(service string) []Certificat
 		}
 
 		if rancherCert != nil {
+			//var _ error
 			storedInRancher = true
 			certsFound[i].RancherCertId = rancherCert.Id
-			certsFound[i].ExpiryDate = rancherCert.ExpiryDate
+			certsFound[i].ExpiryDate, _ = time.Parse("Mon Jan 2 15:04:05 MST 2006", rancherCert.ExpiresAt)
 			logrus.Infof("Found existing certificate '%s' in Rancher", baseCert.CommonName)
 		}
 
