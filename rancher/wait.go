@@ -35,7 +35,7 @@ func backoff(maxDuration time.Duration, timeoutMessage string, f func() (bool, e
 
 // WaitFor waits for a resource to reach a certain state.
 func (r *Client) WaitFor(resource *types.Resource, output interface{}, transitioning func() string) error {
-	return backoff(2*time.Minute, fmt.Sprintf("Time out waiting for %s:%s to become active", resource.Type, resource.Id), func() (bool, error) {
+	return backoff(2*time.Minute, fmt.Sprintf("Time out waiting for %s:%s to become active", resource.Type, resource.ID), func() (bool, error) {
 		err := r.client.Reload(resource, output)
 		if err != nil {
 			return false, err

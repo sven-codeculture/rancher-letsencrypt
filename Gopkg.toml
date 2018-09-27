@@ -39,7 +39,13 @@
 
 [[constraint]]
   name = "github.com/xenolf/lego"
-  version = "1.0.1"
+  branch = "master"
+#  version = "1.0.1"
+
+[[override]]
+  name = "github.com/dnsimple/dnsimple-go"
+#  version = "0.20.0"
+  revision = "35bcc6b47c20ec9bf3a53adcb7fa9665a75f0e7b"
 
 [prune]
   go-tests = true

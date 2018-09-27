@@ -47,16 +47,16 @@ func (c *Context) GatherCertificates() {
 
 func (c *Context) renew() {
 	c.GatherCertificates()
-	for index, cert := range c.Certificates {
+	for _, cert := range c.Certificates {
 		logrus.Infof("Trying to obtain SSL certificate (%s: %s) from Let's Encrypt %s CA",
 			cert.CommonName, strings.Join(cert.AltNames, ","), cert.Acme.ApiVersion())
 
 		var success bool
-		var newCert Certificate
+		//var newCert Certificate
 		if cert.ExpiryDate.IsZero() {
-			success, newCert = c.GetCertNew(cert)
+			success, _ = c.GetCertNew(cert)
 		} else {
-			success, newCert = c.GetCertRenewal(cert)
+			success, _ = c.GetCertRenewal(cert)
 		}
 
 		if success {

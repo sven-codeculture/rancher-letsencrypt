@@ -84,12 +84,11 @@
   version = "v3.2.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:85c526baaf3fd33efe069af6bd75419ef7efccfb181ab7c8796321141a6578a2"
+  digest = "1:6b873be0e0ec65484ee086d02143f31332e363b968fdc6d6663160fa98fda505"
   name = "github.com/dnsimple/dnsimple-go"
   packages = ["dnsimple"]
   pruneopts = "UT"
-  revision = "f1325bedd5c7a52da7831b781886f1a5e8a5d644"
+  revision = "35bcc6b47c20ec9bf3a53adcb7fa9665a75f0e7b"
 
 [[projects]]
   digest = "1:e033489d60ea8b7d2cc73e0499a5173e64a2ed7762e1b83e1ab671056e411603"
@@ -239,11 +238,13 @@
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:652ca488a0d37abff26b834b0d792f00043c8d2f6eb8609c3107b3e51e652b81"
+  branch = "master"
+  digest = "1:216bdc3bdc04d3ef69aac33ad11ee0845d6b7f4b0d22ff792a6ba7c5f839a93a"
   name = "github.com/xenolf/lego"
   packages = [
     "acme",
     "log",
+    "platform/config/env",
     "providers/dns/auroradns",
     "providers/dns/azure",
     "providers/dns/cloudflare",
@@ -257,8 +258,7 @@
     "providers/dns/vultr",
   ]
   pruneopts = "UT"
-  revision = "27e0f97c9df37cad8c4ba0ef1d133fa57afb7469"
-  version = "v1.0.1"
+  revision = "ad20bf90ff5479cb8c63aef7e0f773b3c7e35835"
 
 [[projects]]
   branch = "master"
