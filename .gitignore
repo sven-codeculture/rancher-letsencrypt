@@ -6,3 +6,4 @@ rancher-letsencrypt*
 secrets.txt
 .DS_Store
 .idea
+run.sh
