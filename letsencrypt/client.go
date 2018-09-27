@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	lego "github.com/xenolf/lego/acme"
 	loge "github.com/xenolf/lego/log"
 )

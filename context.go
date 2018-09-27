@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/vxcontrol/rancher-letsencrypt/letsencrypt"
-	"github.com/vxcontrol/rancher-letsencrypt/rancher"
+	"github.com/sirupsen/logrus"
+	"rancher-letsencrypt/letsencrypt"
+	"rancher-letsencrypt/rancher"
 )
 
 const (
@@ -175,7 +175,7 @@ func (c *Context) BuildCertificatesFromServiceLabel(service string) []Certificat
 		if rancherCert != nil {
 			//var _ error
 			storedInRancher = true
-			certsFound[i].RancherCertId = rancherCert.Id
+			certsFound[i].RancherCertId = rancherCert.ID
 			certsFound[i].ExpiryDate, _ = time.Parse("Mon Jan 2 15:04:05 MST 2006", rancherCert.ExpiresAt)
 			logrus.Infof("Found existing certificate '%s' in Rancher", baseCert.CommonName)
 		}
@@ -183,7 +183,7 @@ func (c *Context) BuildCertificatesFromServiceLabel(service string) []Certificat
 		if storedLocally && storedInRancher {
 			if rancherCert.SerialNumber != acmeCert.SerialNumber {
 				logrus.Infof("Serial number mismatch between Rancher and local certificate '%s'", baseCert.CommonName)
-				c.updateRancherCert(baseCert.CommonName, rancherCert.Id, acmeCert.PrivateKey, acmeCert.Certificate)
+				c.updateRancherCert(baseCert.CommonName, rancherCert.ID, acmeCert.PrivateKey, acmeCert.Certificate)
 			}
 		} else if storedLocally && !storedInRancher {
 			logrus.Debugf("Adding certificate '%s' to Rancher", baseCert.CommonName)

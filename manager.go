@@ -4,7 +4,7 @@ import (
 	// "os"
 	"strings"
 	"time"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func (c *Context) Run() {
@@ -36,7 +36,7 @@ func (c *Context) GatherCertificates() {
 	}
 
 	for _, service := range labelledServices {
-		labelValue := service.LaunchConfig.Labels[c.ServiceLabel].(string)
+		labelValue := service.Labels[c.ServiceLabel].(string)
 		certsFound := c.BuildCertificatesFromServiceLabel(labelValue)
 		for i, _ := range certsFound {
 			c.Certificates = append(c.Certificates, certsFound[i])
@@ -62,13 +62,13 @@ func (c *Context) renew() {
 
 		if success {
 			logrus.Infof("Certificate managed successfully")
-			err := c.Rancher.UpdateLoadBalancer(c.LoadBalancerName, newCert.RancherCertId)
-			if err == nil {
-				c.Certificates[index] = newCert
-				logrus.Infof("Updated Load Balancer")
-			} else {
-				logrus.Fatalf("Failed to upgrade load balancers: %v", err)
-			}
+			//err := c.Rancher.UpdateLoadBalancer(c.LoadBalancerName, newCert.RancherCertId)
+			//if err == nil {
+			//	c.Certificates[index] = newCert
+			//	logrus.Infof("Updated Load Balancer")
+			//} else {
+			//	logrus.Fatalf("Failed to upgrade load balancers: %v", err)
+			//}
 		}
 	}
 }
@@ -133,7 +133,7 @@ func (c *Context) addRancherCert(commonName string, privateKey []byte, cert []by
 		return ""
 	}
 	logrus.Infof("Certificate '%s' added to Rancher", commonName)
-	return rancherCert.Id
+	return rancherCert.ID
 }
 
 func (c *Context) updateRancherCert(commonName string, rancherCertId string, privateKey []byte, cert []byte) bool {

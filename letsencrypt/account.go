@@ -9,7 +9,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	lego "github.com/xenolf/lego/acme"
 )
 

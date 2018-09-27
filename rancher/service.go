@@ -2,13 +2,15 @@ package rancher
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
-	rancherClient "github.com/rancher/go-rancher/v2"
+	"github.com/sirupsen/logrus"
+	rancherClient "github.com/rancher/types/client/project/v3"
+	"github.com/rancher/norman/types"
+
 )
 
 // GetServiceById retrieves an existing Service by ID
 func (r *Client) GetServiceById(serviceId string) (*rancherClient.Service, error) {
-	rancherService, err := r.client.Service.ById(serviceId)
+	rancherService, err := r.client.Service.ByID(serviceId)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +28,7 @@ func (r *Client) FindActiveServices() ([]rancherClient.Service, error) {
 
 	logrus.Info("Looking up stacks with labels")
 
-	services, err := r.client.Service.List(&rancherClient.ListOpts{
+	services, err := r.client.Service.List(&types.ListOpts{
 		Filters: map[string]interface{}{
 			"state": "active",
 		},
@@ -51,7 +53,7 @@ func (r *Client) FindActiveServices() ([]rancherClient.Service, error) {
 func (r *Client) FilterServicesByLabel(services []rancherClient.Service, label string) ([]rancherClient.Service) {
 	var results []rancherClient.Service
 	for _, service := range services {
-		for key, val := range service.LaunchConfig.Labels {
+		for key, val := range service.Labels {
 			if key == label {
 				logrus.Debugf("%s has %s = %s", service.Name, label, val)
 				results = append(results, service)

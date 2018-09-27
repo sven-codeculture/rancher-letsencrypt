@@ -6,7 +6,7 @@ import:
   version: v10.10.0
 - package: github.com/JamesClonk/vultr
   version: 1.13.0
-- package: github.com/Sirupsen/logrus
+- package: github.com/sirupsen/logrus
   version: v1.0.5
 - package: github.com/aws/aws-sdk-go
   version: v1.14.3
