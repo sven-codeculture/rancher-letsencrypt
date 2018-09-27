@@ -1,4 +1,4 @@
-package: github.com/vxcontrol/rancher-letsencrypt
+package: github.com/optanix/rancher-letsencrypt
 import:
 - package: github.com/Azure/azure-sdk-for-go
   version: v17.3.0
