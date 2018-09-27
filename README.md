@@ -1,15 +1,15 @@
-![Rancher + Let's Encrypt = Awesome Sauce](https://raw.githubusercontent.com/janeczku/rancher-letsencrypt/master/hero.png)
+![Rancher + Let's Encrypt = Awesome Sauce](https://raw.githubusercontent.com/vxcontrol/rancher-letsencrypt/master/hero.png)
 
 # Let's Encrypt Certificate Manager for Rancher
 
-[![Latest Version](https://img.shields.io/github/release/janeczku/rancher-letsencrypt.svg?maxAge=8600)][release]
-[![Circle CI](https://circleci.com/gh/janeczku/rancher-letsencrypt.svg?style=shield&circle-token=cd06c9a78ae3ef7b6c1387067c36360f62d97b7a)][circleci]
-[![Docker Pulls](https://img.shields.io/docker/pulls/janeczku/rancher-letsencrypt.svg?maxAge=8600)][hub]
-[![License](https://img.shields.io/github/license/janeczku/rancher-letsencrypt.svg?maxAge=8600)]()
+[![Latest Version](https://img.shields.io/github/release/vxcontrol/rancher-letsencrypt.svg?maxAge=8600)][release]
+[![Circle CI](https://circleci.com/gh/vxcontrol/rancher-letsencrypt.svg?style=shield&circle-token=cd06c9a78ae3ef7b6c1387067c36360f62d97b7a)][circleci]
+[![Docker Pulls](https://img.shields.io/docker/pulls/vxcontrol/rancher-letsencrypt.svg?maxAge=8600)][hub]
+[![License](https://img.shields.io/github/license/vxcontrol/rancher-letsencrypt.svg?maxAge=8600)]()
 
-[release]: https://github.com/janeczku/rancher-letsencrypt/releases
-[circleci]: https://circleci.com/gh/janeczku/rancher-letsencrypt
-[hub]: https://hub.docker.com/r/janeczku/rancher-letsencrypt/
+[release]: https://github.com/vxcontrol/rancher-letsencrypt/releases
+[circleci]: https://circleci.com/gh/vxcontrol/rancher-letsencrypt
+[hub]: https://hub.docker.com/r/vxcontrol/rancher-letsencrypt/
 
 A [Rancher](http://rancher.com/rancher/) service that obtains free SSL/TLS certificates from the [Let's Encrypt CA](https://letsencrypt.org/), adds them to Rancher's certificate store and manages renewal and propagation of updated certificates to load balancers.
 
@@ -45,6 +45,61 @@ You can specify a volume name to store account data, certificate and private key
 To share the certificates with other services you may specify a persistent storage driver (e.g. rancher-nfs).
 
 See the README in the Rancher catalog for more information.
+
+#### Configuration reference
+
+You can either set environment variables or use Rancher Secrets for provider configuration.
+
+Possible options are:
+
+*Azure*
+
+- AZURE_CLIENT_ID - /run/secrets/azure_client_id
+- AZURE_CLIENT_SECRET - /run/secrets/azure_client_secret
+- AZURE_SUBSCRIPTION_ID - /run/secrets/azure_subscription_id
+- AZURE_TENANT_ID - /run/secrets/azure_tenant_id
+- AZURE_RESOURCE_GROUP - /run/secrets/azure_resource_group
+
+*Aurora*
+
+- AURORA_USER_ID - /run/secrets/aurora_user_id
+- AURORA_KEY - /run/secrets/aurora_key
+- AURORA_ENDPOINT - /run/secrets/aurora_endpoint
+
+*CloudFlare*
+- CLOUDFLARE_EMAIL - /run/secrets/cloudflare_email
+- CLOUDFLARE_KEY - /run/secrets/cloudflare_key
+
+*DigitalOcean*
+- DO_ACCESS_TOKEN - /run/secrets/do_access_token
+
+*AWS*
+- AWS_ACCESS_KEY - /run/secrets/aws_access_key
+- AWS_SECRET_KEY - /run/secrets/aws_secret_key
+
+*DNSSimple*
+- DNSIMPLE_EMAIL - /run/secrets/dnsimple_email
+- DNSIMPLE_KEY - /run/secrets/dnsimple_key
+
+*DYN*
+- DYN_CUSTOMER_NAME - /run/secrets/dyn_customer_name
+- DYN_USER_NAME - /run/secrets/dyn_user_name
+- DYN_PASSWORD - /run/secrets/dyn_password
+
+*VULTR*
+- VULTR_API_KEY - /run/secrets/vultr_api_key
+
+*OVH*
+- OVH_APPLICATION_KEY - /run/secrets/ovh_application_key
+- OVH_APPLICATION_SECRET - /run/secrets/ovh_application_secret
+- OVH_CONSUMER_KEY - /run/secrets/ovh_consumer_key
+
+*GANDI*
+- GANDI_API_KEY - /run/secrets/gandi_api_key
+
+*NS1*
+- NS1_API_KEY - /run/secrets/ns1_api_key
+
 
 ### Provider specific usage
 

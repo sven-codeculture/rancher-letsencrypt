@@ -1,5 +1,5 @@
 export GOPATH=/opt
-export PROJECT_AUTH=janeczku
+export PROJECT_AUTH=optanix
 export PROJECT_NAME=rancher-letsencrypt
 
 mkdir -p $GOPATH/src/github.com/$PROJECT_AUTH/

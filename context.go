@@ -1,14 +1,15 @@
 package main
 
 import (
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/janeczku/rancher-letsencrypt/letsencrypt"
-	"github.com/janeczku/rancher-letsencrypt/rancher"
+	"github.com/vxcontrol/rancher-letsencrypt/letsencrypt"
+	"github.com/vxcontrol/rancher-letsencrypt/rancher"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 	ISSUER_PRODUCTION   = "Let's Encrypt"
 	ISSUER_STAGING      = "fake CA"
 	RENEWAL_PERIOD_DAYS = 20
+	RANCHER_SECRETS_DIR = "/run/secrets/"
 )
 
 type Certificate struct {
@@ -195,8 +197,14 @@ func (c *Context) BuildCertificatesFromServiceLabel(service string) []Certificat
 
 func getEnvOption(name string, required bool) string {
 	val := os.Getenv(name)
+
+	if len(val) == 0 {
+		buf, _ := ioutil.ReadFile(RANCHER_SECRETS_DIR + strings.ToLower(name))
+		val = string(buf)
+	}
+
 	if required && len(val) == 0 {
-		logrus.Fatalf("Required environment variable not set: %s", name)
+		logrus.Fatalf("Required environment variable not set or secrets file missing for: %s", name)
 	}
 	return strings.TrimSpace(val)
 }
