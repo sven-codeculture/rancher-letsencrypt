@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
 	// "os"
 	"strings"
 	"time"
-	"github.com/sirupsen/logrus"
 )
 
 func (c *Context) Run() {
@@ -21,7 +21,6 @@ func (c *Context) Run() {
 	}
 }
 
-
 func (c *Context) GatherCertificates() {
 	activeServices, err := c.Rancher.FindActiveServices()
 	if err != nil {
@@ -36,7 +35,7 @@ func (c *Context) GatherCertificates() {
 	}
 
 	for _, service := range labelledServices {
-		labelValue := service.Labels[c.ServiceLabel].(string)
+		labelValue := service.Labels[c.ServiceLabel]
 		certsFound := c.BuildCertificatesFromServiceLabel(labelValue)
 		for i, _ := range certsFound {
 			c.Certificates = append(c.Certificates, certsFound[i])
@@ -81,10 +80,8 @@ func (c *Context) GetCertNew(cert Certificate) (bool, Certificate) {
 	}
 
 	acmeCert, failures := cert.Acme.Issue(cert.CommonName, append([]string{cert.CommonName}, cert.AltNames...))
-	if len(failures) > 0 {
-		for k, v := range failures {
-			logrus.Errorf("[%s] Error obtaining certificate: %s", k, v.Error())
-		}
+	if failures != nil {
+		logrus.Errorf("[%s] Error obtaining certificate: %s", cert.CommonName, failures.Error())
 	} else {
 		if cert.RancherCertId != "" {
 			if c.updateRancherCert(cert.CommonName, cert.RancherCertId, acmeCert.PrivateKey, acmeCert.Certificate) {
@@ -145,6 +142,7 @@ func (c *Context) updateRancherCert(commonName string, rancherCertId string, pri
 	logrus.Infof("Updated Rancher certificate '%s'", commonName)
 	return true
 }
+
 //
 
 func (c *Context) timer() <-chan time.Time {
@@ -209,10 +207,10 @@ func (c *Context) parseServiceLabel(label string) []Certificate {
 		}
 
 		certsOut = append(certsOut, Certificate{
-			TLD: title_split[1],
+			TLD:        title_split[1],
 			CommonName: title_split[2],
-			AltNames: alt_names,
-			KeyType: title_split[0],
+			AltNames:   alt_names,
+			KeyType:    title_split[0],
 		})
 	}
 

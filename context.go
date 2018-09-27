@@ -21,12 +21,12 @@ const (
 )
 
 type Certificate struct {
-	TLD           string
-	CommonName    string
-	AltNames      []string
-	KeyType       string
+	TLD        string
+	CommonName string
+	AltNames   []string
+	KeyType    string
 
-	ExpiryDate    time.Time
+	ExpiryDate time.Time
 
 	RancherCertId string
 	Acme          *letsencrypt.Client
@@ -100,7 +100,6 @@ func (c *Context) InitContext() {
 	if err != nil || c.RenewalDayTime < 0 || c.RenewalDayTime > 23 {
 		logrus.Fatalf("Invalid value for RENEWAL_TIME: %s", dayTimeParam)
 	}
-
 
 	c.Rancher, err = rancher.NewClient(cattleUrl, cattleApiKey, cattleSecretKey)
 	if err != nil {
