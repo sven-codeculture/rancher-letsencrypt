@@ -4,20 +4,20 @@ import (
 	"fmt"
 	// "os"
 
-	legoChallenge "github.com/go-acme/lego/challenge"
+	legoChallenge "github.com/vostronet/lego/challenge"
 
-	"github.com/go-acme/lego/providers/dns/stackpath"
-	// "github.com/go-acme/lego/providers/dns/auroradns"
-	// "github.com/go-acme/lego/providers/dns/azure"
-	// "github.com/go-acme/lego/providers/dns/cloudflare"
-	// "github.com/go-acme/lego/providers/dns/digitalocean"
-	// "github.com/go-acme/lego/providers/dns/dnsimple"
-	// "github.com/go-acme/lego/providers/dns/dyn"
-	// "github.com/go-acme/lego/providers/dns/gandi"
-	// "github.com/go-acme/lego/providers/dns/ns1"
-	// "github.com/go-acme/lego/providers/dns/ovh"
-	// "github.com/go-acme/lego/providers/dns/route53"
-	// "github.com/go-acme/lego/providers/dns/vultr"
+	"github.com/vostronet/lego/providers/dns/stackpath"
+	// "github.com/vostronet/lego/providers/dns/auroradns"
+	// "github.com/vostronet/lego/providers/dns/azure"
+	// "github.com/vostronet/lego/providers/dns/cloudflare"
+	// "github.com/vostronet/lego/providers/dns/digitalocean"
+	// "github.com/vostronet/lego/providers/dns/dnsimple"
+	// "github.com/vostronet/lego/providers/dns/dyn"
+	// "github.com/vostronet/lego/providers/dns/gandi"
+	// "github.com/vostronet/lego/providers/dns/ns1"
+	// "github.com/vostronet/lego/providers/dns/ovh"
+	// "github.com/vostronet/lego/providers/dns/route53"
+	// "github.com/vostronet/lego/providers/dns/vultr"
 )
 
 // ProviderOpts is used to configure the DNS provider

@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	legoCrypto "github.com/go-acme/lego/certcrypto"
-	legoRegistration "github.com/go-acme/lego/registration"
+	legoCrypto "github.com/vostronet/lego/certcrypto"
+	legoRegistration "github.com/vostronet/lego/registration"
 )
 type Account struct {
 	Email        string                     `json:"email"`

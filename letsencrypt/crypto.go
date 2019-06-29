@@ -12,7 +12,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	legoCrypto "github.com/go-acme/lego/certcrypto"
+	legoCrypto "github.com/vostronet/lego/certcrypto"
 )
 
 func generatePrivateKey(keyType legoCrypto.KeyType, file string) (crypto.PrivateKey, error) {

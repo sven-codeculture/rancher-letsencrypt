@@ -15,11 +15,11 @@ import (
 	"encoding/pem"
 
 	"github.com/sirupsen/logrus"
-	lego "github.com/go-acme/lego/lego"
-	legoCrypto "github.com/go-acme/lego/certcrypto"
-	legoCertificate "github.com/go-acme/lego/certificate"
-	legoChallenge "github.com/go-acme/lego/challenge"
-	legoRegistration "github.com/go-acme/lego/registration"
+	lego "github.com/vostronet/lego/lego"
+	legoCrypto "github.com/vostronet/lego/certcrypto"
+	legoCertificate "github.com/vostronet/lego/certificate"
+	legoChallenge "github.com/vostronet/lego/challenge"
+	legoRegistration "github.com/vostronet/lego/registration"
 )
 
 const (
