@@ -10,19 +10,19 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	lego "github.com/xenolf/lego/acme"
+	legoCrypto "github.com/go-acme/lego/certcrypto"
+	legoRegistration "github.com/go-acme/lego/registration"
 )
-
 type Account struct {
 	Email        string                     `json:"email"`
-	Registration *lego.RegistrationResource `json:"registrations"`
+	Registration *legoRegistration.Resource `json:"registrations"`
 
 	key  crypto.PrivateKey
 	path string
 }
 
 // NewAccount creates a new or gets a stored LE account for the given email
-func NewAccount(email string, apiVer ApiVersion, keyType lego.KeyType) (*Account, error) {
+func NewAccount(email string, apiVer ApiVersion, keyType legoCrypto.KeyType) (*Account, error) {
 	accPath := accountPath(email, apiVer)
 	keyFile := path.Join(accPath, "account.key")
 	accountFile := path.Join(accPath, "account.json")
@@ -85,7 +85,7 @@ func (a *Account) GetPrivateKey() crypto.PrivateKey {
 }
 
 // GetRegistration returns the server registration
-func (a *Account) GetRegistration() *lego.RegistrationResource {
+func (a *Account) GetRegistration() *legoRegistration.Resource {
 	return a.Registration
 }
 

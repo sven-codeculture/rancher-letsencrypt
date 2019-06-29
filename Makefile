@@ -7,7 +7,7 @@
 PROJECT := rancher-letsencrypt
 PLATFORMS := linux
 ARCH := amd64
-DOCKER_IMAGE := optanix/$(PROJECT)
+DOCKER_IMAGE := vostronet/$(PROJECT)
 
 VERSION := $(shell cat VERSION)
 SHA := $(shell git rev-parse --short HEAD)
@@ -29,7 +29,7 @@ build: build-dir
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=$(VERSION) -X main.Git=$(SHA)" -o build/$(PROJECT)-linux-amd64
 
 deps:
-	go get github.com/c4milo/github-release
+	go 
 
 vet:
 	scripts/vet
@@ -38,7 +38,7 @@ test:
 	go test -v ./...
 
 docker:
-	docker build -t timw/rancher-letsencrypt -f Dockerfile.local .
+	docker build -t vostronet/rancher-letsencrypt -f Dockerfile.local .
 
 release:
 	git tag -f `cat VERSION`
