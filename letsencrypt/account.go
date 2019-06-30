@@ -13,6 +13,7 @@ import (
 	legoCrypto "github.com/vostronet/lego/certcrypto"
 	legoRegistration "github.com/vostronet/lego/registration"
 )
+
 type Account struct {
 	Email        string                     `json:"email"`
 	Registration *legoRegistration.Resource `json:"registrations"`

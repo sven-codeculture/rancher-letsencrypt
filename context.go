@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"github.com/VostroNet/rancher-letsencrypt/letsencrypt"
-	"github.com/VostroNet/rancher-letsencrypt/rancher"
+	"github.com/vostronet/rancher-letsencrypt/letsencrypt"
+	"github.com/vostronet/rancher-letsencrypt/rancher"
 )
 
 const (
@@ -101,7 +101,7 @@ func (c *Context) InitContext() {
 	}
 
 	providerOpts := letsencrypt.ProviderOpts{
-		Provider:             letsencrypt.Provider(providerParam),
+		Provider: letsencrypt.Provider(providerParam),
 		// AzureClientId:        getEnvOption("AZURE_CLIENT_ID", false),
 		// AzureClientSecret:    getEnvOption("AZURE_CLIENT_SECRET", false),
 		// AzureSubscriptionId:  getEnvOption("AZURE_SUBSCRIPTION_ID", false),

@@ -3,7 +3,7 @@ package rancher
 import (
 	"time"
 
-	rancherClient "github.com/VostroNet/go-rancher/v2"
+	rancherClient "github.com/vostronet/go-rancher/v2"
 )
 
 type Client struct {

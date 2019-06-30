@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+
 	// "log"
 	"os"
 	"path"
@@ -11,19 +12,16 @@ import (
 	"strings"
 	"time"
 
-	"crypto/x509"
-	"encoding/pem"
-
 	"github.com/sirupsen/logrus"
-	lego "github.com/vostronet/lego/lego"
 	legoCrypto "github.com/vostronet/lego/certcrypto"
 	legoCertificate "github.com/vostronet/lego/certificate"
 	legoChallenge "github.com/vostronet/lego/challenge"
+	lego "github.com/vostronet/lego/lego"
 	legoRegistration "github.com/vostronet/lego/registration"
 )
 
 const (
-	StorageDir       = "/etc/letsencrypt"
+	StorageDir = "/etc/letsencrypt"
 	// ProductionApiUri = "https://acme-v01.api.letsencrypt.org/directory"
 	// StagingApiUri    = "https://acme-staging.api.letsencrypt.org/directory"
 )
@@ -163,7 +161,7 @@ func (c *Client) Issue(certName string, domains []string) (*AcmeCertificate, err
 	for _, domain := range domains {
 		logrus.Infof("domains requested %s", domain)
 	}
-	
+
 	request := legoCertificate.ObtainRequest{
 		Domains: domains,
 		Bundle:  true,
@@ -281,10 +279,10 @@ func (c *Client) saveCertificate(certName, dnsNames string, certRes legoCertific
 	}
 
 	acmeCert := AcmeCertificate{
-		Resource: certRes,
-		ExpiryDate:          expiryDate,
-		SerialNumber:        serialNumber,
-		DnsNames:            dnsNames,
+		Resource:     certRes,
+		ExpiryDate:   expiryDate,
+		SerialNumber: serialNumber,
+		DnsNames:     dnsNames,
 	}
 
 	certPath := c.CertPath(certName)
@@ -364,23 +362,4 @@ func safeFileName(str string) string {
 	str = illegals.ReplaceAllString(str, "")
 	str = dashes.ReplaceAllString(str, "-")
 	return str
-}
-
-
-
-// getCertExpiration returns the "NotAfter" date of a DER encoded certificate.
-func GetPEMCertExpiration(cert []byte) (time.Time, error) {
-	pCert, err := x509.ParseCertificate(cert)
-	if err != nil {
-		return time.Time{}, err
-	}
-	return pCert.NotAfter, nil
-}
-func pemDecode(data []byte) (*pem.Block, error) {
-	pemBlock, _ := pem.Decode(data)
-	if pemBlock == nil {
-		return nil, fmt.Errorf("Pem decode did not yield a valid block. Is the certificate in the right format?")
-	}
-
-	return pemBlock, nil
 }

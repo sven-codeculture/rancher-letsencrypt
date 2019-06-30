@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	legoCrypto "github.com/vostronet/lego/certcrypto"
 )
@@ -91,3 +92,23 @@ func getPEMCertSerialNumber(cert []byte) (string, error) {
 	return pCert.SerialNumber.String(), nil
 }
 
+// getCertExpiration returns the "NotAfter" date of a DER encoded certificate.
+func GetPEMCertExpiration(cert []byte) (time.Time, error) {
+	pemBlock, _ := pem.Decode(cert)
+	if pemBlock == nil {
+		return time.Now(), fmt.Errorf("Pem decode did not yield a valid block")
+	}
+	pCert, err := x509.ParseCertificate(pemBlock.Bytes)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return pCert.NotAfter, nil
+}
+func pemDecode(data []byte) (*pem.Block, error) {
+	pemBlock, _ := pem.Decode(data)
+	if pemBlock == nil {
+		return nil, fmt.Errorf("Pem decode did not yield a valid block. Is the certificate in the right format?")
+	}
+
+	return pemBlock, nil
+}

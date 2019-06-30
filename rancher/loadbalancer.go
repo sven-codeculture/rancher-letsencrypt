@@ -2,7 +2,7 @@ package rancher
 
 import (
 	"github.com/sirupsen/logrus"
-	rancherClient "github.com/VostroNet/go-rancher/v2"
+	rancherClient "github.com/vostronet/go-rancher/v2"
 )
 
 // UpdateLoadBalancers updates all load balancers with the renewed certificate

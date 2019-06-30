@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	rancherClient "github.com/VostroNet/go-rancher/v2"
+	rancherClient "github.com/vostronet/go-rancher/v2"
 )
 
 func backoff(maxDuration time.Duration, timeoutMessage string, f func() (bool, error)) error {

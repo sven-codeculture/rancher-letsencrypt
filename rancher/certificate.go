@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	rancherClient "github.com/VostroNet/go-rancher/v2"
+	rancherClient "github.com/vostronet/go-rancher/v2"
 )
 
 // AddCertificate creates a new certificate resource using the given private key and PEM encoded certificate

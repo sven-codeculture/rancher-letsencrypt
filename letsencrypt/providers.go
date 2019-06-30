@@ -87,7 +87,7 @@ const (
 	// ROUTE53      = Provider("Route53")
 	// VULTR        = Provider("Vultr")
 	// HTTP         = Provider("HTTP")
-	STACKPATH    = Provider("StackPath")
+	STACKPATH = Provider("StackPath")
 )
 
 type ProviderFactory struct {
@@ -96,7 +96,7 @@ type ProviderFactory struct {
 }
 
 var providerFactory = map[Provider]ProviderFactory{
-	STACKPATH:    ProviderFactory{makeStackPathProvider, legoChallenge.DNS01},
+	STACKPATH: ProviderFactory{makeStackPathProvider, legoChallenge.DNS01},
 	// AURORA:       ProviderFactory{makeAuroraProvider, lego.DNS01},
 	// AZURE:        ProviderFactory{makeAzureProvider, lego.DNS01},
 	// CLOUDFLARE:   ProviderFactory{makeCloudflareProvider, lego.DNS01},
@@ -130,7 +130,6 @@ func makeStackPathProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
 	}
 	return provider, nil
 }
-
 
 // returns a preconfigured Aurora lego.ChallengeProvider
 // func makeAuroraProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
