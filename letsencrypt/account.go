@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	legoCrypto "github.com/vostronet/lego/certcrypto"
-	legoRegistration "github.com/vostronet/lego/registration"
+	legoCrypto "github.com/go-acme/lego/v3/certcrypto"
+	legoRegistration "github.com/go-acme/lego/v3/registration"
 )
 
 type Account struct {

@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	legoCrypto "github.com/vostronet/lego/certcrypto"
-	legoCertificate "github.com/vostronet/lego/certificate"
-	legoChallenge "github.com/vostronet/lego/challenge"
-	lego "github.com/vostronet/lego/lego"
-	legoRegistration "github.com/vostronet/lego/registration"
+	legoCrypto "github.com/go-acme/lego/v3/certcrypto"
+	legoCertificate "github.com/go-acme/lego/v3/certificate"
+	legoChallenge "github.com/go-acme/lego/v3/challenge"
+	lego "github.com/go-acme/lego/v3/lego"
+	legoRegistration "github.com/go-acme/lego/v3/registration"
 )
 
 const (
