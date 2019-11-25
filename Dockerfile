@@ -6,7 +6,7 @@ COPY ./ /build
 
 WORKDIR /build
 
-RUN make build
+RUN make -j 4 build
 
 FROM alpine:3.10
 
