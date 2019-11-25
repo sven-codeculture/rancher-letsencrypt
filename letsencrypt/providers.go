@@ -6,18 +6,18 @@ import (
 
 	legoChallenge "github.com/vostronet/lego/challenge"
 
+	"github.com/vostronet/lego/providers/dns/auroradns"
+	"github.com/vostronet/lego/providers/dns/azure"
+	"github.com/vostronet/lego/providers/dns/cloudflare"
+	"github.com/vostronet/lego/providers/dns/digitalocean"
+	"github.com/vostronet/lego/providers/dns/dnsimple"
+	"github.com/vostronet/lego/providers/dns/dyn"
+	"github.com/vostronet/lego/providers/dns/gandi"
+	"github.com/vostronet/lego/providers/dns/ns1"
+	"github.com/vostronet/lego/providers/dns/ovh"
+	"github.com/vostronet/lego/providers/dns/route53"
 	"github.com/vostronet/lego/providers/dns/stackpath"
-	// "github.com/vostronet/lego/providers/dns/auroradns"
-	// "github.com/vostronet/lego/providers/dns/azure"
-	// "github.com/vostronet/lego/providers/dns/cloudflare"
-	// "github.com/vostronet/lego/providers/dns/digitalocean"
-	// "github.com/vostronet/lego/providers/dns/dnsimple"
-	// "github.com/vostronet/lego/providers/dns/dyn"
-	// "github.com/vostronet/lego/providers/dns/gandi"
-	// "github.com/vostronet/lego/providers/dns/ns1"
-	// "github.com/vostronet/lego/providers/dns/ovh"
-	// "github.com/vostronet/lego/providers/dns/route53"
-	// "github.com/vostronet/lego/providers/dns/vultr"
+	"github.com/vostronet/lego/providers/dns/vultr"
 )
 
 // ProviderOpts is used to configure the DNS provider
@@ -75,17 +75,17 @@ type ProviderOpts struct {
 type Provider string
 
 const (
-	// AURORA       = Provider("Aurora")
-	// AZURE        = Provider("Azure")
-	// CLOUDFLARE   = Provider("CloudFlare")
-	// DIGITALOCEAN = Provider("DigitalOcean")
-	// DNSIMPLE     = Provider("DNSimple")
-	// DYN          = Provider("Dyn")
-	// GANDI        = Provider("Gandi")
-	// NS1          = Provider("NS1")
-	// OVH          = Provider("Ovh")
-	// ROUTE53      = Provider("Route53")
-	// VULTR        = Provider("Vultr")
+	AURORA       = Provider("Aurora")
+	AZURE        = Provider("Azure")
+	CLOUDFLARE   = Provider("CloudFlare")
+	DIGITALOCEAN = Provider("DigitalOcean")
+	DNSIMPLE     = Provider("DNSimple")
+	DYN          = Provider("Dyn")
+	GANDI        = Provider("Gandi")
+	NS1          = Provider("NS1")
+	OVH          = Provider("Ovh")
+	ROUTE53      = Provider("Route53")
+	VULTR        = Provider("Vultr")
 	// HTTP         = Provider("HTTP")
 	STACKPATH = Provider("StackPath")
 )
@@ -96,18 +96,18 @@ type ProviderFactory struct {
 }
 
 var providerFactory = map[Provider]ProviderFactory{
-	STACKPATH: ProviderFactory{makeStackPathProvider, legoChallenge.DNS01},
-	// AURORA:       ProviderFactory{makeAuroraProvider, lego.DNS01},
-	// AZURE:        ProviderFactory{makeAzureProvider, lego.DNS01},
-	// CLOUDFLARE:   ProviderFactory{makeCloudflareProvider, lego.DNS01},
-	// DIGITALOCEAN: ProviderFactory{makeDigitalOceanProvider, lego.DNS01},
-	// DNSIMPLE:     ProviderFactory{makeDNSimpleProvider, lego.DNS01},
-	// DYN:          ProviderFactory{makeDynProvider, lego.DNS01},
-	// GANDI:        ProviderFactory{makeGandiProvider, lego.DNS01},
-	// NS1:          ProviderFactory{makeNS1Provider, lego.DNS01},
-	// OVH:          ProviderFactory{makeOvhProvider, lego.DNS01},
-	// ROUTE53:      ProviderFactory{makeRoute53Provider, lego.DNS01},
-	// VULTR:        ProviderFactory{makeVultrProvider, lego.DNS01},
+	STACKPATH:    ProviderFactory{makeStackPathProvider, legoChallenge.DNS01},
+	AURORA:       ProviderFactory{makeAuroraProvider, legoChallenge.DNS01},
+	AZURE:        ProviderFactory{makeAzureProvider, legoChallenge.DNS01},
+	CLOUDFLARE:   ProviderFactory{makeCloudflareProvider, legoChallenge.DNS01},
+	DIGITALOCEAN: ProviderFactory{makeDigitalOceanProvider, legoChallenge.DNS01},
+	DNSIMPLE:     ProviderFactory{makeDNSimpleProvider, legoChallenge.DNS01},
+	DYN:          ProviderFactory{makeDynProvider, legoChallenge.DNS01},
+	GANDI:        ProviderFactory{makeGandiProvider, legoChallenge.DNS01},
+	NS1:          ProviderFactory{makeNS1Provider, legoChallenge.DNS01},
+	OVH:          ProviderFactory{makeOvhProvider, legoChallenge.DNS01},
+	ROUTE53:      ProviderFactory{makeRoute53Provider, legoChallenge.DNS01},
+	VULTR:        ProviderFactory{makeVultrProvider, legoChallenge.DNS01},
 	// HTTP:         ProviderFactory{makeHTTPProvider, lego.HTTP01},
 }
 
@@ -131,203 +131,109 @@ func makeStackPathProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
 	return provider, nil
 }
 
-// returns a preconfigured Aurora lego.ChallengeProvider
-// func makeAuroraProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
-// 	if len(opts.AuroraUserId) == 0 {
-// 		return nil, fmt.Errorf("Aurora User Id is not set")
-// 	}
+// returns a preconfigured Aurora legoChallenge.Provider
+func makeAuroraProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := auroradns.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
 
-// 	if len(opts.AuroraKey) == 0 {
-// 		return nil, fmt.Errorf("Aurora Key is not set")
-// 	}
+	return provider, nil
+}
 
-// 	endpoint := opts.AuroraEndpoint
-// 	if len(endpoint) == 0 {
-// 		endpoint = "https://api.auroradns.eu"
-// 	}
+// returns a preconfigured CloudFlare legoChallenge.Provider
+func makeCloudflareProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := cloudflare.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// 	provider, err := auroradns.NewDNSProviderCredentials(endpoint, opts.AuroraUserId,
-// 		opts.AuroraKey)
+// returns a preconfigured DigitalOcean legoChallenge.Provider
+func makeDigitalOceanProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := digitalocean.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+// returns a preconfigured Route53 legoChallenge.Provider
+func makeRoute53Provider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := route53.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// 	return provider, nil
-// }
+// returns a preconfigured DNSimple legoChallenge.Provider
+func makeDNSimpleProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := dnsimple.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// // returns a preconfigured CloudFlare lego.ChallengeProvider
-// func makeCloudflareProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.CloudflareEmail) == 0 {
-// 		return nil, fmt.Errorf("CloudFlare email is not set")
-// 	}
-// 	if len(opts.CloudflareKey) == 0 {
-// 		return nil, fmt.Errorf("CloudFlare API key is not set")
-// 	}
+// returns a preconfigured Dyn legoChallenge.Provider
+func makeDynProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := dyn.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// 	provider, err := cloudflare.NewDNSProviderCredentials(opts.CloudflareEmail, opts.CloudflareKey)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
+// returns a preconfigured Vultr legoChallenge.Provider
+func makeVultrProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := vultr.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// // returns a preconfigured DigitalOcean lego.ChallengeProvider
-// func makeDigitalOceanProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.DoAccessToken) == 0 {
-// 		return nil, fmt.Errorf("DigitalOcean API access token is not set")
-// 	}
+// returns a preconfigured Ovh legoChallenge.Provider
+func makeOvhProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := ovh.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// 	provider, err := digitalocean.NewDNSProviderCredentials(opts.DoAccessToken)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
+// returns a preconfigured Gandi legoChallenge.Provider
+func makeGandiProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := gandi.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// // returns a preconfigured Route53 lego.ChallengeProvider
-// func makeRoute53Provider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.AwsAccessKey) == 0 {
-// 		return nil, fmt.Errorf("AWS access key is not set")
-// 	}
-// 	if len(opts.AwsSecretKey) == 0 {
-// 		return nil, fmt.Errorf("AWS secret key is not set")
-// 	}
-
-// 	os.Setenv("AWS_REGION", "us-east-1")
-// 	os.Setenv("AWS_ACCESS_KEY_ID", opts.AwsAccessKey)
-// 	os.Setenv("AWS_SECRET_ACCESS_KEY", opts.AwsSecretKey)
-
-// 	provider, err := route53.NewDNSProvider()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
-
-// // returns a preconfigured DNSimple lego.ChallengeProvider
-// func makeDNSimpleProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.DNSimpleEmail) == 0 {
-// 		return nil, fmt.Errorf("DNSimple Email is not set")
-// 	}
-// 	if len(opts.DNSimpleKey) == 0 {
-// 		return nil, fmt.Errorf("DNSimple API key is not set")
-// 	}
-
-// 	provider, err := dnsimple.NewDNSProviderCredentials(opts.DNSimpleEmail, opts.DNSimpleKey)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
-
-// // returns a preconfigured Dyn lego.ChallengeProvider
-// func makeDynProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.DynCustomerName) == 0 {
-// 		return nil, fmt.Errorf("Dyn customer name is not set")
-// 	}
-// 	if len(opts.DynUserName) == 0 {
-// 		return nil, fmt.Errorf("Dyn user name is not set")
-// 	}
-// 	if len(opts.DynPassword) == 0 {
-// 		return nil, fmt.Errorf("Dyn password is not set")
-// 	}
-
-// 	provider, err := dyn.NewDNSProviderCredentials(opts.DynCustomerName,
-// 		opts.DynUserName, opts.DynPassword)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
-
-// // returns a preconfigured Vultr lego.ChallengeProvider
-// func makeVultrProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.VultrApiKey) == 0 {
-// 		return nil, fmt.Errorf("Vultr API key is not set")
-// 	}
-
-// 	provider, err := vultr.NewDNSProviderCredentials(opts.VultrApiKey)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
-
-// // returns a preconfigured Ovh lego.ChallengeProvider
-// func makeOvhProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.OvhApplicationKey) == 0 {
-// 		return nil, fmt.Errorf("OVH application key is not set")
-// 	}
-// 	if len(opts.OvhApplicationSecret) == 0 {
-// 		return nil, fmt.Errorf("OVH application secret is not set")
-// 	}
-// 	if len(opts.OvhConsumerKey) == 0 {
-// 		return nil, fmt.Errorf("OVH consumer key is not set")
-// 	}
-
-// 	provider, err := ovh.NewDNSProviderCredentials("ovh-eu", opts.OvhApplicationKey, opts.OvhApplicationSecret,
-// 		opts.OvhConsumerKey)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
-
-// // returns a preconfigured Gandi lego.ChallengeProvider
-// func makeGandiProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.GandiApiKey) == 0 {
-// 		return nil, fmt.Errorf("Gandi API key is not set")
-// 	}
-
-// 	provider, err := gandi.NewDNSProviderCredentials(opts.GandiApiKey)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
-
-// // returns a preconfigured HTTP lego.ChallengeProvider
-// func makeHTTPProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
+// // returns a preconfigured HTTP legoChallenge.Provider
+// func makeHTTPProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
 // 	provider := lego.NewHTTPProviderServer("", "")
 // 	return provider, nil
 // }
 
-// // returns a preconfigured Azure lego.ChallengeProvider
-// func makeAzureProvider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.AzureClientId) == 0 {
-// 		return nil, fmt.Errorf("Azure Client ID is not set")
-// 	}
-// 	if len(opts.AzureClientSecret) == 0 {
-// 		return nil, fmt.Errorf("Azure Client Secret is not set")
-// 	}
-// 	if len(opts.AzureSubscriptionId) == 0 {
-// 		return nil, fmt.Errorf("Azure Subscription ID is not set")
-// 	}
-// 	if len(opts.AzureTenantId) == 0 {
-// 		return nil, fmt.Errorf("Azure Tenant ID is not set")
-// 	}
-// 	if len(opts.AzureResourceGroup) == 0 {
-// 		return nil, fmt.Errorf("Azure Resource Group is not set")
-// 	}
+// returns a preconfigured Azure legoChallenge.Provider
+func makeAzureProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
 
-// 	provider, err := azure.NewDNSProviderCredentials(opts.AzureClientId, opts.AzureClientSecret, opts.AzureSubscriptionId,
-// 		opts.AzureTenantId, opts.AzureResourceGroup)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
+	provider, err := azure.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
 
-// // returns a preconfigured NS1 lego.ChallengeProvider
-// func makeNS1Provider(opts ProviderOpts) (lego.ChallengeProvider, error) {
-// 	if len(opts.NS1ApiKey) == 0 {
-// 		return nil, fmt.Errorf("NS1 API key is not set")
-// 	}
-
-// 	provider, err := ns1.NewDNSProviderCredentials(opts.NS1ApiKey)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return provider, nil
-// }
+// returns a preconfigured NS1 legoChallenge.Provider
+func makeNS1Provider(opts ProviderOpts) (legoChallenge.Provider, error) {
+	provider, err := ns1.NewDNSProvider()
+	if err != nil {
+		return nil, err
+	}
+	return provider, nil
+}
