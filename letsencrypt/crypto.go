@@ -11,24 +11,25 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
-	lego "github.com/xenolf/lego/acme"
+	legoCrypto "github.com/go-acme/lego/v3/certcrypto"
 )
 
-func generatePrivateKey(keyType lego.KeyType, file string) (crypto.PrivateKey, error) {
+func generatePrivateKey(keyType legoCrypto.KeyType, file string) (crypto.PrivateKey, error) {
 	var privateKey crypto.PrivateKey
 	var err error
 
 	switch keyType {
-	case lego.EC256:
+	case legoCrypto.EC256:
 		privateKey, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	case lego.EC384:
+	case legoCrypto.EC384:
 		privateKey, err = ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
-	case lego.RSA2048:
+	case legoCrypto.RSA2048:
 		privateKey, err = rsa.GenerateKey(rand.Reader, 2048)
-	case lego.RSA4096:
+	case legoCrypto.RSA4096:
 		privateKey, err = rsa.GenerateKey(rand.Reader, 4096)
-	case lego.RSA8192:
+	case legoCrypto.RSA8192:
 		privateKey, err = rsa.GenerateKey(rand.Reader, 8192)
 	default:
 		return nil, fmt.Errorf("Invalid KeyType: %s", keyType)
@@ -89,4 +90,25 @@ func getPEMCertSerialNumber(cert []byte) (string, error) {
 	}
 
 	return pCert.SerialNumber.String(), nil
+}
+
+// getCertExpiration returns the "NotAfter" date of a DER encoded certificate.
+func GetPEMCertExpiration(cert []byte) (time.Time, error) {
+	pemBlock, _ := pem.Decode(cert)
+	if pemBlock == nil {
+		return time.Now(), fmt.Errorf("Pem decode did not yield a valid block")
+	}
+	pCert, err := x509.ParseCertificate(pemBlock.Bytes)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return pCert.NotAfter, nil
+}
+func pemDecode(data []byte) (*pem.Block, error) {
+	pemBlock, _ := pem.Decode(data)
+	if pemBlock == nil {
+		return nil, fmt.Errorf("Pem decode did not yield a valid block. Is the certificate in the right format?")
+	}
+
+	return pemBlock, nil
 }

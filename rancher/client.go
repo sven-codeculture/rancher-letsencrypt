@@ -3,30 +3,28 @@ package rancher
 import (
 	"time"
 
-	rancherClient "github.com/rancher/types/client/project/v3"
-	"github.com/rancher/norman/clientbase"
+	rancherClient "github.com/vostronet/go-rancher/v2"
 )
 
 type Client struct {
-	client *rancherClient.Client
+	client *rancherClient.RancherClient
 }
 
 // NewClient returns a new client for the Rancher/Cattle API
 func NewClient(rancherUrl string, rancherAccessKey string, rancherSecretKey string) (*Client, error) {
-
-	opts := &clientbase.ClientOpts{
-		URL:       rancherUrl,
+	opts := &rancherClient.ClientOpts{
+		Url:       rancherUrl,
 		AccessKey: rancherAccessKey,
 		SecretKey: rancherSecretKey,
 		Timeout:   time.Second * 5,
 	}
 
 	var err error
-	var apiClient *rancherClient.Client
+	var apiClient *rancherClient.RancherClient
 	maxTime := 10 * time.Second
 
 	for i := 1 * time.Second; i < maxTime; i *= time.Duration(2) {
-		apiClient, err = rancherClient.NewClient(opts)
+		apiClient, err = rancherClient.NewRancherClient(opts)
 		if err == nil {
 			break
 		}

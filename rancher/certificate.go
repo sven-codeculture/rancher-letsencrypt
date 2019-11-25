@@ -4,8 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	rancherClient "github.com/rancher/types/client/project/v3"
-	"github.com/rancher/norman/types"
+	rancherClient "github.com/vostronet/go-rancher/v2"
 )
 
 // AddCertificate creates a new certificate resource using the given private key and PEM encoded certificate
@@ -16,7 +15,7 @@ func (r *Client) AddCertificate(name, descr string, privateKey, cert []byte) (*r
 	config := &rancherClient.Certificate{
 		Name:        name,
 		Description: descr,
-		Certs:        certString,
+		Cert:        certString,
 		Key:         keyString,
 	}
 
@@ -38,14 +37,14 @@ func (r *Client) AddCertificate(name, descr string, privateKey, cert []byte) (*r
 func (r *Client) UpdateCertificate(certId, descr string, privateKey, cert []byte) error {
 	certString := string(cert[:])
 	keyString := string(privateKey[:])
-	rancherCert, err := r.client.Certificate.ByID(certId)
+	rancherCert, err := r.client.Certificate.ById(certId)
 	if err != nil {
 		return err
 	}
 
 	rancherCert, err = r.client.Certificate.Update(rancherCert, &rancherClient.Certificate{
 		Description: descr,
-		Certs:        certString,
+		Cert:        certString,
 		Key:         keyString,
 	})
 	if err != nil {
@@ -61,7 +60,7 @@ func (r *Client) UpdateCertificate(certId, descr string, privateKey, cert []byte
 func (r *Client) FindCertByName(name string) (*rancherClient.Certificate, error) {
 	logrus.Debugf("Looking up Rancher certificate by name: %s", name)
 
-	certificates, err := r.client.Certificate.List(&types.ListOpts{
+	certificates, err := r.client.Certificate.List(&rancherClient.ListOpts{
 		Filters: map[string]interface{}{
 			"name":         name,
 			"removed_null": nil,
@@ -82,7 +81,7 @@ func (r *Client) FindCertByName(name string) (*rancherClient.Certificate, error)
 
 // GetCertById retrieves an existing certificate by ID
 func (r *Client) GetCertById(certId string) (*rancherClient.Certificate, error) {
-	rancherCert, err := r.client.Certificate.ByID(certId)
+	rancherCert, err := r.client.Certificate.ById(certId)
 	if err != nil {
 		return nil, err
 	}

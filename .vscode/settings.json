@@ -1,0 +1,8 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#2B2B44",
+        "titleBar.activeBackground": "#3D3D60",
+        "titleBar.activeForeground": "#FBFBFD"
+    },
+    "go.useLanguageServer": true
+}

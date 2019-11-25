@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+
+	// "log"
 	"os"
 	"path"
 	"regexp"
@@ -12,14 +13,17 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	lego "github.com/xenolf/lego/acme"
-	loge "github.com/xenolf/lego/log"
+	legoCrypto "github.com/go-acme/lego/v3/certcrypto"
+	legoCertificate "github.com/go-acme/lego/v3/certificate"
+	legoChallenge "github.com/go-acme/lego/v3/challenge"
+	lego "github.com/go-acme/lego/v3/lego"
+	legoRegistration "github.com/go-acme/lego/v3/registration"
 )
 
 const (
-	StorageDir       = "/etc/letsencrypt"
-	ProductionApiUri = "https://acme-v02.api.letsencrypt.org/directory"
-	StagingApiUri    = "https://acme-staging-v02.api.letsencrypt.org/directory"
+	StorageDir = "/etc/letsencrypt"
+	// ProductionApiUri = "https://acme-v01.api.letsencrypt.org/directory"
+	// StagingApiUri    = "https://acme-staging.api.letsencrypt.org/directory"
 )
 
 type KeyType string
@@ -47,7 +51,7 @@ const (
 // Certificate []byte
 // Domain      string
 type AcmeCertificate struct {
-	lego.CertificateResource
+	legoCertificate.Resource
 	DnsNames     string    `json:"dnsNames"`
 	ExpiryDate   time.Time `json:"expiryDate"`
 	SerialNumber string    `json:"serialNumber"`
@@ -62,30 +66,20 @@ type Client struct {
 
 // NewClient returns a new Lets Encrypt client
 func NewClient(email string, kt KeyType, apiVer ApiVersion, dnsResolvers []string, provider ProviderOpts) (*Client, error) {
-	var keyType lego.KeyType
+	var keyType legoCrypto.KeyType
 	switch kt {
 	case RSA2048:
-		keyType = lego.RSA2048
+		keyType = legoCrypto.RSA2048
 	case RSA4096:
-		keyType = lego.RSA4096
+		keyType = legoCrypto.RSA4096
 	case RSA8192:
-		keyType = lego.RSA8192
+		keyType = legoCrypto.RSA8192
 	case EC256:
-		keyType = lego.EC256
+		keyType = legoCrypto.EC256
 	case EC384:
-		keyType = lego.EC384
+		keyType = legoCrypto.EC384
 	default:
 		return nil, fmt.Errorf("Invalid private key type: %s", string(kt))
-	}
-
-	var serverUri string
-	switch apiVer {
-	case Production:
-		serverUri = ProductionApiUri
-	case Sandbox:
-		serverUri = StagingApiUri
-	default:
-		return nil, fmt.Errorf("Invalid API version: %s", string(apiVer))
 	}
 
 	acc, err := NewAccount(email, apiVer, keyType)
@@ -93,16 +87,28 @@ func NewClient(email string, kt KeyType, apiVer ApiVersion, dnsResolvers []strin
 		return nil, fmt.Errorf("Could not initialize account store for %s: %v", email, err)
 	}
 
-	client, err := lego.NewClient(serverUri, acc, keyType)
+	config := lego.NewConfig(acc)
+	config.Certificate.KeyType = keyType
+
+	switch apiVer {
+	case Production:
+		config.CADirURL = lego.LEDirectoryProduction
+	case Sandbox:
+		config.CADirURL = lego.LEDirectoryStaging
+	default:
+		return nil, fmt.Errorf("Invalid API version: %s", string(apiVer))
+	}
+
+	client, err := lego.NewClient(config)
 	if err != nil {
 		return nil, fmt.Errorf("Could not create client: %v", err)
 	}
 
-	loge.Logger = log.New(ioutil.Discard, "", 0)
+	// lego.Logger = log.New(ioutil.Discard, "", 0)
 
 	if acc.Registration == nil {
 		logrus.Infof("Creating Let's Encrypt account for %s", email)
-		reg, err := client.Register(true)
+		reg, err := client.Registration.Register(legoRegistration.RegisterOptions{TermsOfServiceAgreed: true})
 		if err != nil {
 			return nil, fmt.Errorf("Failed to register account: %v", err)
 		}
@@ -121,20 +127,20 @@ func NewClient(email string, kt KeyType, apiVer ApiVersion, dnsResolvers []strin
 		return nil, fmt.Errorf("Could not get provider: %v", err)
 	}
 
-	err = client.SetChallengeProvider(challenge, prov)
-	if err != nil {
-		return nil, fmt.Errorf("Could not set provider: %v", err)
+	if challenge == legoChallenge.DNS01 {
+		err = client.Challenge.SetDNS01Provider(prov)
+		if err != nil {
+			return nil, fmt.Errorf("Could not set provider: %v", err)
+		}
+	} else if challenge == legoChallenge.HTTP01 {
+		err = client.Challenge.SetHTTP01Provider(prov)
+		if err != nil {
+			return nil, fmt.Errorf("Could not set provider: %v", err)
+		}
 	}
-
-	if challenge == lego.DNS01 {
-		client.ExcludeChallenges([]lego.Challenge{lego.HTTP01})
-	} else if challenge == lego.HTTP01 {
-		client.ExcludeChallenges([]lego.Challenge{lego.DNS01})
-	}
-
-	if len(dnsResolvers) > 0 {
-		lego.RecursiveNameservers = dnsResolvers
-	}
+	// if len(dnsResolvers) > 0 {
+	// 	lego.RecursiveNameservers = dnsResolvers
+	// }
 
 	return &Client{
 		client:     client,
@@ -147,21 +153,28 @@ func NewClient(email string, kt KeyType, apiVer ApiVersion, dnsResolvers []strin
 func (c *Client) EnableLogs() {
 	logger := logrus.New()
 	logger.Out = os.Stdout
-	loge.Logger = log.New(logger.Writer(), "", 0)
+	// lego.Logger = log.New(logger.Writer(), "", 0)
 }
 
 // Issue obtains a new SAN certificate from the Lets Encrypt CA
 func (c *Client) Issue(certName string, domains []string) (*AcmeCertificate, error) {
-	certRes, err := c.client.ObtainCertificate(domains, true, nil, false)
+	for _, domain := range domains {
+		logrus.Infof("domains requested %s", domain)
+	}
+
+	request := legoCertificate.ObtainRequest{
+		Domains: domains,
+		Bundle:  true,
+	}
+
+	certificates, err := c.client.Certificate.Obtain(request)
 	if err != nil {
 		return nil, err
 	}
-
 	dnsNames := dnsNamesIdentifier(domains)
-	acmeCert, err := c.saveCertificate(certName, dnsNames, certRes)
+	acmeCert, err := c.saveCertificate(certName, dnsNames, *certificates)
 	if err != nil {
 		logrus.Fatalf("Error saving certificate '%s': %v", certName, err)
-		return nil, err
 	}
 
 	return acmeCert, nil
@@ -174,13 +187,12 @@ func (c *Client) Renew(certName string) (*AcmeCertificate, error) {
 		return nil, fmt.Errorf("Error loading certificate '%s': %v", certName, err)
 	}
 
-	certRes := acmeCert.CertificateResource
-	newCertRes, err := c.client.RenewCertificate(certRes, true, false)
+	newCertRes, err := c.client.Certificate.Renew(acmeCert.Resource, true, false)
 	if err != nil {
 		return nil, err
 	}
 
-	newAcmeCert, err := c.saveCertificate(certName, acmeCert.DnsNames, newCertRes)
+	newAcmeCert, err := c.saveCertificate(certName, acmeCert.DnsNames, *newCertRes)
 	if err != nil {
 		logrus.Fatalf("Error saving certificate '%s': %v", certName, err)
 	}
@@ -256,8 +268,8 @@ func (c *Client) loadCertificateByName(certName string) (AcmeCertificate, error)
 	return acmeCert, nil
 }
 
-func (c *Client) saveCertificate(certName, dnsNames string, certRes *lego.CertificateResource) (*AcmeCertificate, error) {
-	expiryDate, err := lego.GetPEMCertExpiration(certRes.Certificate)
+func (c *Client) saveCertificate(certName, dnsNames string, certRes legoCertificate.Resource) (*AcmeCertificate, error) {
+	expiryDate, err := GetPEMCertExpiration(certRes.Certificate)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to read certificate expiry date: %v", err)
 	}
@@ -267,10 +279,10 @@ func (c *Client) saveCertificate(certName, dnsNames string, certRes *lego.Certif
 	}
 
 	acmeCert := AcmeCertificate{
-		CertificateResource: *certRes,
-		ExpiryDate:          expiryDate,
-		SerialNumber:        serialNumber,
-		DnsNames:            dnsNames,
+		Resource:     certRes,
+		ExpiryDate:   expiryDate,
+		SerialNumber: serialNumber,
+		DnsNames:     dnsNames,
 	}
 
 	certPath := c.CertPath(certName)
