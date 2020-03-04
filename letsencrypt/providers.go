@@ -18,6 +18,7 @@ import (
 	"github.com/go-acme/lego/v3/providers/dns/route53"
 	"github.com/go-acme/lego/v3/providers/dns/stackpath"
 	"github.com/go-acme/lego/v3/providers/dns/vultr"
+  "github.com/go-acme/lego/v3/challenge/http01"
 )
 
 // ProviderOpts is used to configure the DNS provider
@@ -86,7 +87,7 @@ const (
 	OVH          = Provider("Ovh")
 	ROUTE53      = Provider("Route53")
 	VULTR        = Provider("Vultr")
-	// HTTP         = Provider("HTTP")
+	HTTP         = Provider("HTTP")
 	STACKPATH = Provider("StackPath")
 )
 
@@ -108,7 +109,7 @@ var providerFactory = map[Provider]ProviderFactory{
 	OVH:          ProviderFactory{makeOvhProvider, legoChallenge.DNS01},
 	ROUTE53:      ProviderFactory{makeRoute53Provider, legoChallenge.DNS01},
 	VULTR:        ProviderFactory{makeVultrProvider, legoChallenge.DNS01},
-	// HTTP:         ProviderFactory{makeHTTPProvider, lego.HTTP01},
+  HTTP:         ProviderFactory{makeHTTPProvider, legoChallenge.HTTP01},
 }
 
 func getProvider(opts ProviderOpts) (legoChallenge.Provider, legoChallenge.Type, error) {
@@ -213,11 +214,11 @@ func makeGandiProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
 	return provider, nil
 }
 
-// // returns a preconfigured HTTP legoChallenge.Provider
-// func makeHTTPProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
-// 	provider := lego.NewHTTPProviderServer("", "")
-// 	return provider, nil
-// }
+// returns a preconfigured HTTP legoChallenge.Provider
+func makeHTTPProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
+ 	provider := http01.NewProviderServer("", "");
+	return provider, nil
+}
 
 // returns a preconfigured Azure legoChallenge.Provider
 func makeAzureProvider(opts ProviderOpts) (legoChallenge.Provider, error) {
